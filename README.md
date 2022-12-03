@@ -4,9 +4,22 @@
 
 **Technology Used:** Python PEP 8 and Google Calander API
 
-**Next Steps to Improve the Discord Bot:** Add machine learning, add additional bot responses, and integrate the bot with other claander APIs
+**Next Steps to Improve the Discord Bot:** Add machine learning, add additional bot responses, and integrate the bot with other calendar APIs
 
-## Using the Chat Bot:
+## Setup
+
+This project contains multiple components that must be set up prior to use:
+- A Discord bot must be [created](https://discord.com/developers/docs/getting-started) and given adminstrator privileges. 
+  - The bot's token should be stored in a variable called DISCORD_TOKEN in a file named ".env" within the working directory.
+- A project within Google Cloud must be [created](https://cloud.google.com/resource-manager/docs/creating-managing-projects). 
+  - The Google Calendar API has to be [enabled](https://cloud.google.com/apis/docs/getting-started#enabling_apis).
+  - OAuth2 credentials have to be [set up](https://support.google.com/cloud/answer/6158849) for a web application with "https://google.com" as an authorized redirect URI.
+  - The credentials have to be downloaded and stored in a file named "credentials.json" within the working directory.
+  - (Optional) The publishing status has to be [changed](https://support.google.com/cloud/answer/10311615) to "in production" to allow anyone to use the calendar functionality.
+
+With these criteria met, the project is ready to run.
+
+## Using the Chat Bot
 
 **Step 1:** When the user is mentioned the bot will send them a DM
 ![screenshot](ChatBot1.png)
@@ -17,7 +30,7 @@
 **Step 3:** The user then picks an option and that response is sent in the chat
 ![screenshot](ChatBot3.png)
 
-## Using the Calender
+## Using the Calendar
 
 **Step 1:** Users can begin giving their credentials with !calendar
 ![screenshot](CalendarBot1.png)
