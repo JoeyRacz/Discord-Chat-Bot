@@ -6,6 +6,7 @@ import rand_response
 import sys
 import games
 
+
 def load_json(file):
     with open(file) as bot_responses:
         print(f"Successfully loaded {file}")
@@ -13,6 +14,7 @@ def load_json(file):
 
 
 responses_data = load_json("bot.json")
+
 
 def bot_response(user_message) -> str:
     # for each word in user message

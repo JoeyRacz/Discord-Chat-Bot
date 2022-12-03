@@ -24,7 +24,7 @@ def search_creds(name):
                 json.dump(data[name], token)
             return Credentials.from_authorized_user_file('token.json', SCOPES)
     # Return None if the user does not have any registered credentials.
-    return
+    return None
 
 
 async def get_credentials(bot, embed, author, author2):
@@ -44,14 +44,13 @@ async def get_credentials(bot, embed, author, author2):
             embed.description = f"To authorize the bot to access your calendar, sign in [here]({auth_url}) " \
                                 "and then respond to this message with the resulting url."
 
+            await author.send(embed=embed)
             try:
-                await author.send(embed=embed)
                 response = await bot.wait_for("message", timeout=100)
                 code = response.content
                 # Slice the url to contain only the authorization code.
                 code = code[code.find("code=") + 5:]
                 code = code[:code.find('&')]
-
                 # Use the inputted authorization code to fetch the user's token.
                 flow.fetch_token(code=code)
                 creds = flow.credentials
@@ -62,14 +61,14 @@ async def get_credentials(bot, embed, author, author2):
                 await author.send("The request timed out. Please try again later.")
                 return
 
-        # Write the contents of creds to a json file to be read later.
+        # Write the contents of creds to a json file to be read and converted to a dictionary
         with open('token.json', 'w') as token:
             token.write(creds.to_json())
+        with open('token.json', 'r') as token:
+            credentials = json.load(token)
 
         if os.path.exists('tokens.json'):
             with open('tokens.json', 'r') as tokens:
-                with open('token.json', 'r') as token:
-                    credentials = json.load(token)
                 data = json.load(tokens)
             # Overwrite the json file with the updated data dictionary.
             with open('tokens.json', 'w') as tokens:
@@ -82,55 +81,16 @@ async def get_credentials(bot, embed, author, author2):
         # Create a json if it does not already exist.
         else:
             with open('tokens.json', 'w') as tokens:
-                with open('token.json', 'r') as token:
-                    credentials = json.load(token)
                 data = {name: credentials}
                 json.dump(data, tokens)
 
         await author.send("Credentials received successfully.")
+        return
     await author.send("You already have valid calendar credentials registered.")
 
 
-def search_calendar(author, year, month, day):
-    name = author
-
-    start_date = datetime.datetime(year, month, day)
-    # Add one day to start_date to create a 24-hour window for events.
-    end_date = start_date + datetime.timedelta(days=1)
-
-    # Change the timezone to EST
-    start_date = start_date.isoformat() + '-05:00'
-    end_date = end_date.isoformat() + '-05:00'
-
-    creds = search_creds(name)
-
-    try:
-        service = build('calendar', 'v3', credentials=creds)
-
-        # Call the Calendar API.
-        print('Getting the upcoming 10 events')
-        events_result = service.events().list(calendarId='primary', timeMax=end_date, timeMin=start_date,
-                                              maxResults=10, singleEvents=True,
-                                              orderBy='startTime').execute()
-        events = events_result.get('items', [])
-
-        if not events:
-            print('No upcoming events found.')
-            return
-
-        # Prints the start and name of the next 10 events.
-        for event in events:
-            start = event['start'].get('dateTime', event['start'].get('date'))
-            print(start, event['summary'])
-
-    except HttpError as error:
-        print('An error occurred: %s' % error)
-    except UnboundLocalError:
-        print("The username has not been registered to a calendar.")
-
-
 # Search calendar for Discord bot.
-async def search2_calendar(mentions_string, date, mentions_real):
+async def search_calendar(mentions_string, date, mentions_real):
     name = mentions_string
 
     start_date = datetime.strptime(date, '%Y-%m-%d %H:%M:%S')
@@ -147,25 +107,24 @@ async def search2_calendar(mentions_string, date, mentions_real):
         service = build('calendar', 'v3', credentials=creds)
 
         # Call the Calendar API.
-        await mentions_real.send('Getting the upcoming 10 events')
+        await mentions_real.send("Getting the upcoming 10 events.")
         events_result = service.events().list(calendarId='primary', timeMax=end_date, timeMin=start_date,
                                               maxResults=10, singleEvents=True,
                                               orderBy='startTime').execute()
         events = events_result.get('items', [])
 
         if not events:
-            await mentions_real.send('No upcoming events found.')
+            await mentions_real.send("No upcoming events found.")
             return
 
         # Prints the start and name of the next 10 events.
         for event in events:
             start = event['start'].get('dateTime', event['start'].get('date'))
-            start = datetime.strftime(parse(start), format='%H:%M, on %d %B')
+            start = datetime.strftime(parse(start), format='%H:%M, on %d %B.')
             this_event = event['summary']
             await mentions_real.send(f"You have {this_event} at {start}!")
-
     except HttpError as error:
-        await mentions_real.send('An error occurred: %s' % error)
+        await mentions_real.send("An error occurred: %s" % error)
     except UnboundLocalError:
         await mentions_real.send("The username has not been registered to a calendar.")
     return
@@ -185,6 +144,7 @@ async def add_event(start, length, summary, author):
 
     try:
         service = build('calendar', 'v3', credentials=creds)
+
         event = {
             'summary': summary,
             'start': {
