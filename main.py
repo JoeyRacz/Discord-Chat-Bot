@@ -38,7 +38,7 @@ async def on_message(message):
         now = datetime.now().replace(microsecond=0)
         reply = (f"%s" % (cal.parseDT(str(start_message), now)[0]))
         if str(reply) != str(now):
-            await calendar_work.search2_calendar(mentions_string, reply, mentions_real)
+            await calendar_work.search_calendar(mentions_string, reply, mentions_real)
             return
         bot_answer = await discord_bot.bot_response(start_message)
         bot_answer = random.sample(bot_answer, 3)

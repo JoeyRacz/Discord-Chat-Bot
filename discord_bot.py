@@ -62,5 +62,3 @@ async def user_input_output(bot, start_message, mentions_real):
         await mentions_real.send(bot_answer)
         if bot_answer == "See you later!":
             break
-
-
