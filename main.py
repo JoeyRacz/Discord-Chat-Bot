@@ -28,7 +28,6 @@ async def on_ready():
 # Setup for sending a date and message from a mention to google calendar and chatbot algorithm respectively.
 @bot.event
 async def on_message(message):
-    view = discord.ui.View()
     if message.author == client.user:
         return
     if message.mentions:
@@ -43,9 +42,15 @@ async def on_message(message):
         bot_answer = await discord_bot.bot_response(start_message)
         bot_answer = random.sample(bot_answer, 3)
         await mentions_real.send(f"Choose a reply!\n1. {bot_answer[0]}\n2. {bot_answer[1]}\n3. {bot_answer[2]}")
-        reply = await bot.wait_for("message", timeout=100)
-        reply = int(reply.content)
-        await message.channel.send(f"{bot_answer[reply - 1]}")
+        response = await bot.wait_for("message", timeout=100)
+        response = int(response.content)
+        if bot_answer[response - 1].startswith("Yes"):
+            await mentions_real.send("How long will the event be?")
+            event_length = await bot.wait_for("message", timeout=100)
+            await mentions_real.send("What would you like to name the event?")
+            event_name = await bot.wait_for("message", timeout=100)
+            await calendar_work.add_event(reply, event_length, event_name, mentions_real)
+        await message.channel.send(f"{bot_answer[response - 1]}")
     await bot.process_commands(message)
 
 
