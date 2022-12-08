@@ -42,27 +42,10 @@ async def on_message(message):
             return
         bot_answer = await discord_bot.bot_response(start_message)
         bot_answer = random.sample(bot_answer, 3)
-        button1 = discord.ui.Button(label=f"{bot_answer[0]}", style=discord.ButtonStyle.gray)
-        button2 = discord.ui.Button(label=f"{bot_answer[1]}", style=discord.ButtonStyle.gray)
-        button3 = discord.ui.Button(label=f"{bot_answer[2]}", style=discord.ButtonStyle.gray)
-        view.add_item(item=button1)
-        view.add_item(item=button2)
-        view.add_item(item=button3)
         await mentions_real.send(f"Choose a reply!\n1. {bot_answer[0]}\n2. {bot_answer[1]}\n3. {bot_answer[2]}")
         reply = await bot.wait_for("message", timeout=100)
         reply = int(reply.content)
         await message.channel.send(f"{bot_answer[reply - 1]}")
-        """await mentions_real.send(view=view)
-        button = await discord.Interaction.response
-        if button.label == "button1":
-            await message.channel.send(f"{bot_answer[0]}")
-        if button.label == "button2":
-            await message.channel.send(f"{bot_answer[1]}")
-        if button.label == "button3":
-            await message.channel.send(f"{bot_answer[2]}")"""
-        # await message.channel.send(bot_answer)
-        # await message.channel.send(reply)
-        # await discord_bot.user_input_output(bot, start_message, mentions_real)
     await bot.process_commands(message)
 
 

@@ -54,11 +54,3 @@ async def bot_response(user_message) -> str:
         return responses_data[response_index]["bot_response"]
 
     return rand_response.random_string()
-
-
-async def user_input_output(bot, start_message, mentions_real):
-    while start_message:
-        bot_answer = await bot_response(start_message)
-        await mentions_real.send(bot_answer)
-        if bot_answer == "See you later!":
-            break
